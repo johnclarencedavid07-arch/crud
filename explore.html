@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes CRUD App - Live Demo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        :root {
+            --primary: #8B5FBF;
+            --primary-light: #B08BD9;
+            --primary-lighter: #E6D9F2;
+            --accent: #FF6B8B;
+            --accent-light: #FFA7BA;
+            --bg-light: #F7FAFC;
+            --white: #FFFFFF;
+            --dark: #2D3748;
+            --gray: #718096;
+            --gray-light: #A0AEC0;
+            --gray-lighter: #E2E8F0;
+            --danger: #E53E3E;
+            --danger-light: #FED7D7;
+            --success: #38A169;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        body {
+            background-color: var(--bg-light);
+            min-height: 100vh;
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Back Button */
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 25px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 16px;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            transition: all 0.3s;
+            background: var(--white);
+            box-shadow: var(--shadow);
+        }
+
+        .back-button:hover {
+            background: var(--primary);
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Auth Styles */
+        .auth-container {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: var(--shadow-xl);
+            max-width: 420px;
+            margin: 50px auto;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: var(--gradient);
+        }
+
+        .header-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header-title i {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .input {
+            width: 100%;
+            padding: 15px 18px;
+            border: 2px solid var(--gray-lighter);
+            border-radius: 12px;
+            font-size: 16px;
+            background: var(--white);
+            transition: all 0.3s;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-lighter);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: var(--white);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .btn-secondary {
+            background: var(--white);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-lighter);
+            transform: translateY(-2px);
+        }
+
+        .auth-switch {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid var(--gray-lighter);
+            color: var(--gray);
+        }
+
+        .auth-switch-link {
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .auth-switch-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Main App Styles */
+        .app-header {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient);
+        }
+
+        .header-title-main {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title-main i {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-small {
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-add {
+            background: var(--gradient);
+            color: var(--white);
+            border: none;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-logout {
+            background: var(--white);
+            color: var(--danger);
+            border: 2px solid var(--danger);
+        }
+
+        .btn-logout:hover {
+            background: var(--danger-light);
+            transform: translateY(-2px);
+        }
+
+        /* Notes Grid */
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .note-card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s;
+            border-top: 4px solid var(--primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .note-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .note-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .note-card:hover::before {
+            opacity: 1;
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .note-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 8px;
+            line-height: 1.4;
+            flex: 1;
+            padding-right: 10px;
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-light);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--gray);
+        }
+
+        .icon-btn:hover {
+            background: var(--primary-lighter);
+            color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .icon-btn.delete:hover {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .note-body {
+            color: var(--gray);
+            margin-bottom: 15px;
+            line-height: 1.5;
+            flex: 1;
+        }
+
+        .note-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 15px;
+            border-top: 1px solid var(--gray-lighter);
+        }
+
+        .note-date {
+            font-size: 12px;
+            color: var(--gray-light);
+        }
+
+        .note-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            background: var(--primary-lighter);
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .empty-description {
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-container {
+            background: var(--white);
+            width: 90%;
+            max-width: 500px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid var(--gray-lighter);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .modal-content {
+            padding: 25px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn-cancel {
+            background: var(--white);
+            color: var(--gray);
+            border: 2px solid var(--gray-lighter);
+        }
+
+        .btn-cancel:hover {
+            background: var(--gray-lighter);
+        }
+
+        .character-count {
+            text-align: right;
+            font-size: 12px;
+            color: var(--gray-light);
+            margin-top: 5px;
+        }
+
+        .character-count.warning {
+            color: var(--accent);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .app-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+                padding: 20px;
+            }
+            
+            .header-buttons {
+                justify-content: space-between;
+            }
+            
+            .notes-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .auth-container {
+                padding: 30px 20px;
+                margin: 30px auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-buttons {
+                flex-direction: column;
+            }
+            
+            .btn-small {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            Back to Portfolio
+        </a>
+
+        <div id="app">
+            <!-- React app will be rendered here -->
+        </div>
+    </div>
+
+    <!-- Modal for Add/Edit Note -->
+    <div id="noteModal" class="modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <i class="fas fa-edit"></i>
+                <h2 id="modalTitle" class="modal-title">New Note</h2>
+            </div>
+            <div class="modal-content">
+                <div class="input-group">
+                    <label class="input-label" for="noteTitle">Title</label>
+                    <input type="text" id="noteTitle" class="input" placeholder="Enter note title" maxlength="120">
+                    <div id="titleCount" class="character-count">0/120</div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label" for="noteBody">Content</label>
+                    <textarea id="noteBody" class="input" placeholder="Enter note content" style="height: 150px; resize: vertical;"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button id="cancelBtn" class="btn btn-cancel">Cancel</button>
+                    <button id="saveBtn" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Save Note
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Convert React Native functionality to vanilla JavaScript
+        class NotesApp {
+            constructor() {
+                this.storageReady = false;
+                this.user = null;
+                this.authMode = 'login';
+                this.authUsername = '';
+                this.authPassword = '';
+                this.notes = [];
+                this.modalVisible = false;
+                this.title = '';
+                this.body = '';
+                this.editingId = null;
+                
+                this.init();
+            }
+
+            async init() {
+                await this.setupStorage();
+                await this.initStorage();
+                await this.loadCurrentUser();
+                this.storageReady = true;
+                this.render();
+            }
+
+            setupStorage() {
+                // Use localStorage as our storage backend
+                this.storage = {
+                    async getItem(key) {
+                        return localStorage.getItem(key);
+                    },
+                    async setItem(key, value) {
+                        localStorage.setItem(key, value);
+                    },
+                    async removeItem(key) {
+                        localStorage.removeItem(key);
+                    }
+                };
+                return Promise.resolve();
+            }
+
+            async initStorage() {
+                const raw = await this.storage.getItem('@rncrud_users');
+                if (!raw) {
+                    const seedUser = [{ id: 'u_test', username: 'test', password: 'test123' }];
+                    await this.storage.setItem('@rncrud_users', JSON.stringify(seedUser));
+                }
+            }
+
+            async getUsers() {
+                const raw = await this.storage.getItem('@rncrud_users');
+                return raw ? JSON.parse(raw) : [];
+            }
+
+            async saveUsers(users) {
+                await this.storage.setItem('@rncrud_users', JSON.stringify(users));
+            }
+
+            notesKey(userId) {
+                return `@rncrud_notes_user_${userId}`;
+            }
+
+            async getNotesForUser(userId) {
+                const raw = await this.storage.getItem(this.notesKey(userId));
+                return raw ? JSON.parse(raw) : [];
+            }
+
+            async saveNotesForUser(userId, notesArray) {
+                await this.storage.setItem(this.notesKey(userId), JSON.stringify(notesArray));
+            }
+
+            async register() {
+                const username = this.authUsername.trim();
+                const password = this.authPassword;
+                
+                if (!username || !password) {
+                    alert('Please provide both username and password');
+                    return;
+                }
+
+                try {
+                    const users = await this.getUsers();
+                    if (users.find(u => u.username === username)) {
+                        alert('Username already exists');
+                        return;
+                    }
+                    
+                    const newUser = { id: `u_${Date.now()}`, username, password };
+                    users.push(newUser);
+                    await this.saveUsers(users);
+                    alert('Account created successfully. You can now login.');
+                    this.authMode = 'login';
+                    this.authPassword = '';
+                    this.authUsername = '';
+                    this.render();
+                } catch (e) {
+                    alert('Could not create account');
+                }
+            }
+
+            async login() {
+                const username = this.authUsername.trim();
+                const password = this.authPassword;
+                
+                if (!username || !password) {
+                    alert('Please provide both username and password');
+                    return;
+                }
+
+                try {
+                    const users = await this.getUsers();
+                    const found = users.find(u => u.username === username && u.password === password);
+                    if (found) {
+                        await this.storage.setItem('@rncrud_current_user', JSON.stringify({ 
+                            id: found.id, 
+                            username: found.username 
+                        }));
+                        this.user = { id: found.id, username: found.username };
+                        this.authPassword = '';
+                        this.authUsername = '';
+                        await this.loadNotes();
+                        this.render();
+                    } else {
+                        alert('Invalid username or password');
+                    }
+                } catch (e) {
+                    alert('Login failed');
+                }
+            }
+
+            async logout() {
+                await this.storage.removeItem('@rncrud_current_user');
+                this.user = null;
+                this.notes = [];
+                this.render();
+            }
+
+            async loadCurrentUser() {
+                const raw = await this.storage.getItem('@rncrud_current_user');
+                if (raw) {
+                    this.user = JSON.parse(raw);
+                }
+            }
+
+            async loadNotes() {
+                if (!this.user) return;
+                const arr = await this.getNotesForUser(this.user.id);
+                arr.sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
+                this.notes = arr;
+            }
+
+            async createNote() {
+                if (!this.title.trim()) {
+                    alert('Title is required');
+                    return;
+                }
+
+                try {
+                    const createdAt = new Date().toISOString();
+                    const newNote = { 
+                        id: `n_${Date.now()}`, 
+                        title: this.title.trim(), 
+                        body: this.body, 
+                        created_at: createdAt 
+                    };
+                    const arr = await this.getNotesForUser(this.user.id);
+                    arr.unshift(newNote);
+                    await this.saveNotesForUser(this.user.id, arr);
+                    this.title = '';
+                    this.body = '';
+                    this.modalVisible = false;
+                    this.notes = arr;
+                    this.render();
+                } catch (e) {
+                    console.error('Create note error', e);
+                }
+            }
+
+            async updateNote() {
+                if (!this.title.trim()) {
+                    alert('Title is required');
+                    return;
+                }
+
+                try {
+                    const arr = await this.getNotesForUser(this.user.id);
+                    const idx = arr.findIndex(n => n.id === this.editingId);
+                    if (idx === -1) {
+                        alert('Note not found');
+                        return;
+                    }
+                    arr[idx] = { ...arr[idx], title: this.title.trim(), body: this.body };
+                    await this.saveNotesForUser(this.user.id, arr);
+                    this.editingId = null;
+                    this.title = '';
+                    this.body = '';
+                    this.modalVisible = false;
+                    this.notes = arr;
+                    this.render();
+                } catch (e) {
+                    console.error('Update note error', e);
+                }
+            }
+
+            async deleteNote(id) {
+                if (confirm('Are you sure you want to delete this note?')) {
+                    try {
+                        const arr = await this.getNotesForUser(this.user.id);
+                        const filtered = arr.filter(n => n.id !== id);
+                        await this.saveNotesForUser(this.user.id, filtered);
+                        this.notes = filtered;
+                        this.render();
+                    } catch (e) {
+                        console.error('Delete note error', e);
+                    }
+                }
+            }
+
+            openAdd() {
+                this.editingId = null;
+                this.title = '';
+                this.body = '';
+                this.modalVisible = true;
+                this.render();
+            }
+
+            openEdit(note) {
+                this.editingId = note.id;
+                this.title = note.title;
+                this.body = note.body;
+                this.modalVisible = true;
+                this.render();
+            }
+
+            closeModal() {
+                this.modalVisible = false;
+                this.render();
+            }
+
+            renderAuth() {
+                return `
+                    <div class="auth-container">
+                        <div class="header-title">
+                            <i class="fas fa-sticky-note"></i>
+                            CRUD App
+                        </div>
+                        
+                        <div>
+                            <div class="input-group">
+                                <label class="input-label">Username</label>
+                                <input 
+                                    type="text" 
+                                    class="input" 
+                                    placeholder="Enter your username" 
+                                    value="${this.authUsername}" 
+                                    oninput="app.authUsername = this.value"
+                                    autocomplete="username"
+                                >
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">Password</label>
+                                <input 
+                                    type="password" 
+                                    class="input" 
+                                    placeholder="Enter your password" 
+                                    value="${this.authPassword}" 
+                                    oninput="app.authPassword = this.value"
+                                    autocomplete="current-password"
+                                >
+                            </div>
+
+                            ${this.authMode === 'login' ? `
+                                <button class="btn btn-primary" onclick="app.login()">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    Login
+                                </button>
+                                <div class="auth-switch">
+                                    Don't have an account? 
+                                    <a class="auth-switch-link" onclick="app.authMode = 'register'; app.render();">
+                                        Create one here
+                                    </a>
+                                </div>
+                            ` : `
+                                <button class="btn btn-primary" onclick="app.register()">
+                                    <i class="fas fa-user-plus"></i>
+                                    Register
+                                </button>
+                                <div class="auth-switch">
+                                    Already have an account? 
+                                    <a class="auth-switch-link" onclick="app.authMode = 'login'; app.render();">
+                                        Login here
+                                    </a>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderNotes() {
+                if (this.notes.length === 0) {
+                    return `
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-sticky-note"></i>
+                            </div>
+                            <div class="empty-title">No notes yet</div>
+                            <div class="empty-description">Tap the "Add Note" button to create your first note</div>
+                            <button class="btn btn-primary" onclick="app.openAdd()">
+                                <i class="fas fa-plus"></i>
+                                Add Note
+                            </button>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="notes-grid">
+                        ${this.notes.map(note => `
+                            <div class="note-card">
+                                <div class="note-header">
+                                    <div class="note-title">${this.escapeHtml(note.title)}</div>
+                                    <div class="note-actions">
+                                        <button class="icon-btn" onclick="app.openEdit(${JSON.stringify(note).replace(/"/g, '&quot;')})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="icon-btn delete" onclick="app.deleteNote('${note.id}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                ${note.body ? `<div class="note-body">${this.escapeHtml(note.body)}</div>` : ''}
+                                <div class="note-footer">
+                                    <div class="note-date">${new Date(note.created_at).toLocaleString()}</div>
+                                    <div class="note-status">${note.body ? 'With content' : 'Title only'}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            renderMain() {
+                return `
+                    <div>
+                        <div class="app-header">
+                            <div class="header-title-main">
+                                <i class="fas fa-user-circle"></i>
+                                Hello, ${this.user.username}
+                            </div>
+                            <div class="header-buttons">
+                                <button class="btn btn-add btn-small" onclick="app.openAdd()">
+                                    <i class="fas fa-plus"></i>
+                                    Add Note
+                                </button>
+                                <button class="btn btn-logout btn-small" onclick="app.logout()">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Logout
+                                </button>
+                            </div>
+                        </div>
+
+                        ${this.renderNotes()}
+                    </div>
+                `;
+            }
+
+            renderModal() {
+                if (!this.modalVisible) {
+                    document.getElementById('noteModal').style.display = 'none';
+                    return;
+                }
+
+                document.getElementById('modalTitle').textContent = this.editingId ? 'Edit Note' : 'New Note';
+                document.getElementById('noteTitle').value = this.title;
+                document.getElementById('noteBody').value = this.body;
+                
+                // Update character count
+                const titleCount = document.getElementById('titleCount');
+                titleCount.textContent = `${this.title.length}/120`;
+                if (this.title.length > 100) {
+                    titleCount.classList.add('warning');
+                } else {
+                    titleCount.classList.remove('warning');
+                }
+                
+                document.getElementById('noteModal').style.display = 'flex';
+            }
+
+            render() {
+                if (!this.storageReady) {
+                    document.getElementById('app').innerHTML = `
+                        <div style="padding: 40px; text-align: center; background: white; border-radius: 20px; box-shadow: var(--shadow);">
+                            <i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 15px; color: var(--primary);"></i>
+                            <div>Loading Notes App...</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (!this.user) {
+                    document.getElementById('app').innerHTML = this.renderAuth();
+                } else {
+                    document.getElementById('app').innerHTML = this.renderMain();
+                }
+
+                this.renderModal();
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        // Initialize the app
+        const app = new NotesApp();
+
+        // Set up modal event listeners
+        document.getElementById('cancelBtn').addEventListener('click', () => {
+            app.closeModal();
+        });
+
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            app.title = document.getElementById('noteTitle').value;
+            app.body = document.getElementById('noteBody').value;
+            
+            if (app.editingId) {
+                app.updateNote();
+            } else {
+                app.createNote();
+            }
+        });
+
+        // Update character count in real-time
+        document.getElementById('noteTitle').addEventListener('input', function() {
+            const count = this.value.length;
+            const countElement = document.getElementById('titleCount');
+            countElement.textContent = `${count}/120`;
+            
+            if (count > 100) {
+                countElement.classList.add('warning');
+            } else {
+                countElement.classList.remove('warning');
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('noteModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('noteModal')) {
+                app.closeModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && app.modalVisible) {
+                app.closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
